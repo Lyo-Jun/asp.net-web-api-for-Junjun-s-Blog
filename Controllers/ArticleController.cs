@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication3.Entities;
+using WebApplication3.Repositories;
 
 namespace WebApplication3.Controllers;
 
@@ -8,31 +9,50 @@ namespace WebApplication3.Controllers;
 [Route("article")]
 public class ArticleController : ControllerBase
 {
-    private DBContext _context;
+    private readonly IArticleRepository _articleRepository;
+    private readonly ITagRepository _tagRepository;
 
-    public ArticleController(DBContext context)
+
+    public ArticleController(IArticleRepository articleRepository,
+        ITagRepository tagRepository)
     {
-        _context = context;
+        _articleRepository = articleRepository;
+        _tagRepository = tagRepository;
     }
 
     [HttpGet]
-    public IList<Article> GetAll()
+    public IActionResult GetAll()
     {
-        return _context.Articles
-            .Include(a => a.Category)
-            .ToList();
+        return Ok(_articleRepository.GetAll());
     }
 
     [HttpGet("{id:int}")]
-    public ActionResult<Article> GetOne(int id)
+    public IActionResult GetOne([FromRoute] int id)
     {
-        var result = _context.Articles
-            .Include(a => a.Category)
-            .SingleOrDefault(a => a.ID == id);
-        if (result is null)
-            return NotFound();
-        return Ok(result);
+        return Ok(_articleRepository.GetOne(id));
     }
+
+    [HttpGet]
+    public IActionResult GetArticlesByCategory([FromQuery] int catId)
+    {
+        return Ok(_articleRepository.GetArticlesOfACategory(catId));
+    }
+
+    [HttpGet]
+    public IActionResult GetArticlesByTag([FromQuery] int tagId)
+    {
+        return Ok(_articleRepository.GetArticlesOfATag(tagId));
+    }
+
+    [HttpDelete("{id:int}")]
+    public IActionResult DeleteByID([FromRoute] int id)
+    {
+        _articleRepository.DeleteOne(id);
+        return Ok();
+    }
+    
+
+
     [HttpGet("test")]
     public IActionResult Test([FromQuery] int[] t)
     {
