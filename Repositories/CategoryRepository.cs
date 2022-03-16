@@ -1,3 +1,4 @@
+using System.Data.Entity;
 using WebApplication3.Entities;
 
 namespace WebApplication3.Repositories;
@@ -19,7 +20,9 @@ public class CategoryRepository : ICategoryRepository
 
     public Category GetCategoryByArticle(int articleId)
     {
-        return _context.Articles.Find(articleId)?.Category;
+        return _context.Articles.Include(a => a.Category)
+            .FirstOrDefault(a => a.ID == articleId)
+            ?.Category;
     }
 
     public IList<Category> GetAll()

@@ -31,23 +31,19 @@ public class ArticleRepository : IArticleRepository
         return list ?? new List<Article>();
     }
 
-    public Article InsertOne(int catId, IList<int> tagIds, Article article)
+    public Article InsertOne(Article article)
     {
-        article.Category = _context.Categories.Find(catId);
-        article.Tags = _context.Tags.Where(t => tagIds.Contains(t.ID)).ToList();
         _context.Articles.Add(article);
-        _context.SaveChanges();
         return article;
     }
 
-    public Article UpdateOne(int catId, IList<int> tagIds, Article article)
+    public Article UpdateOne(Article article)
     {
-        article.Category = _context.Categories.Find(catId);
-        article.Tags = _context.Tags.Where(t => tagIds.Contains(t.ID)).ToList();
         _context.Articles.Update(article);
         _context.SaveChanges();
         return article;
     }
+
 
     public void DeleteOne(int id)
     {

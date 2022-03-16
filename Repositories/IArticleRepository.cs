@@ -9,9 +9,8 @@ public interface IArticleRepository
 
     IList<Article> GetArticlesOfATag(int tagId);
     IList<Article> GetArticlesOfACategory(int catId);
-    Article InsertOne(int catId, IList<int> tagIds, Article article);
-    Article UpdateOne(int catId, IList<int> tagIds, Article article);
+    Article InsertOne( Article article);
+    Article UpdateOne(Article article);
     void DeleteOne(int id);
     bool Exists(int articleId);
-   
 }
