@@ -13,4 +13,5 @@ public interface IArticleRepository
     Article UpdateOne(Article article);
     void DeleteOne(int id);
     bool Exists(int articleId);
+    void RemoveAllTags(int id);
 }

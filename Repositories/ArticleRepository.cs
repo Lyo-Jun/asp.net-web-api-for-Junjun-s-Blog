@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices.ComTypes;
+using Microsoft.EntityFrameworkCore;
 using WebApplication3.Entities;
 
 namespace WebApplication3.Repositories;
@@ -10,7 +11,9 @@ public class ArticleRepository : IArticleRepository
 
     public IList<Article> GetAll()
     {
-        return _context.Articles.ToList();
+        return _context.Articles
+            .AsNoTracking()
+            .ToList();
     }
 
     public Article GetOne(int articleId)
@@ -20,20 +23,26 @@ public class ArticleRepository : IArticleRepository
 
     public IList<Article> GetArticlesOfATag(int tagId)
     {
-        var list = _context.Tags.Find(tagId)?.Articles;
-        return list ?? new List<Article>();
+        var list = _context.Tags.Find(tagId);
+        if (list == null)
+            return new List<Article>();
+        _context.Entry(list).Collection(t => t.Articles)
+            .Load();
+        return list.Articles;
     }
 
     public IList<Article> GetArticlesOfACategory(int catId)
     {
-        var list = _context.Categories.Find(catId)
-            ?.Articles;
-        return list ?? new List<Article>();
+        var cat = _context.Categories
+            .Include(c => c.Articles)
+            .FirstOrDefault(c => c.ID == catId);
+        return cat?.Articles ?? new List<Article>();
     }
 
     public Article InsertOne(Article article)
     {
         _context.Articles.Add(article);
+        _context.SaveChanges();
         return article;
     }
 
@@ -57,5 +66,14 @@ public class ArticleRepository : IArticleRepository
     public bool Exists(int articleId)
     {
         return _context.Articles.Any(a => a.ID == articleId);
+    }
+
+    public void RemoveAllTags(int id)
+    {
+        _context.Database
+            .ExecuteSqlRaw(@"
+        DELETE FROM ArticleTag
+        WHERE ArticlesID={0}
+        ", id);
     }
 }

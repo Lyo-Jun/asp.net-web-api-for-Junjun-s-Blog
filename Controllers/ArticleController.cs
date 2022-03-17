@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication3.Dtos;
 using WebApplication3.Entities;
+using WebApplication3.Helper;
 using WebApplication3.Repositories;
 
 namespace WebApplication3.Controllers;
@@ -65,28 +67,56 @@ public class ArticleController : ControllerBase
         return Ok();
     }
 
-    [HttpPut("{id:ind}")]
+    [HttpPut("{id:int}")]
     public IActionResult UpdateOne([FromRoute] int id
         , [FromBody] ArticleDto article,
         [FromQuery] int catId = -1,
         [FromQuery] int[]? tags = null)
     {
-        var temp = _mapper.Map<Article>(article);
+        if (article.ID != id)
+            return BadRequest();
+        var temp = _articleRepository.GetOne(id);
+        temp.ChangeSelf(article);
+
         if (catId >= 0)
             temp.Category = _categoryRepository.GetOne(catId);
+
         if (tags != null)
         {
+            _articleRepository.RemoveAllTags(id);
+
             var list = tags.ToList();
             temp.Tags = _tagRepository.GetAll()
                 .Where(t => list.Contains(t.ID))
                 .ToList();
         }
 
-        return Ok(
-            _articleRepository.UpdateOne(temp)
-        );
+        var result = _mapper.Map<ArticleDto>(_articleRepository.UpdateOne(temp));
+        return Ok(result);
     }
-    
+
+    [HttpPost]
+    public IActionResult CreateOne([FromBody] ArticleDto article,
+        [FromQuery] int catId = -1,
+        [FromQuery] int[]? tags = null)
+    {
+        if (catId <= 0)
+            return BadRequest();
+        var result = _mapper.Map<Article>(article);
+
+        if (tags != null)
+        {
+            var list = tags.ToList();
+            result.Tags = _tagRepository.GetAll().Where(t => list.Contains(t.ID))
+                .ToList();
+        }
+
+        result.Category = _categoryRepository.GetOne(catId);
+
+        return Ok(_mapper
+            .Map<ArticleDto>
+                (_articleRepository.InsertOne(result)));
+    }
 
 
     [HttpGet("test")]

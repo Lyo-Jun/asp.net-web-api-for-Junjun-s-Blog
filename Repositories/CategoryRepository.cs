@@ -51,11 +51,8 @@ public class CategoryRepository : ICategoryRepository
         return category;
     }
 
-    public Category UpdateOne(Category category, IList<int>? articleIds)
+    public Category UpdateOne(Category category)
     {
-        var list = _context.Articles.Where(a => articleIds.Contains(a.ID))
-            .ToList();
-        category.Articles = list;
         _context.Categories.Update(category);
         _context.SaveChanges();
         return category;

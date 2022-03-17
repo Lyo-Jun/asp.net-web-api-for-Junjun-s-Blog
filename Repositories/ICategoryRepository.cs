@@ -10,5 +10,5 @@ public interface ICategoryRepository
     IList<Category> GetAll();
     void DeleteOne(int catId);
     Category InsertOne(Category category);
-    Category UpdateOne(Category category, IList<int>? articleIds);
+    Category UpdateOne(Category category);
 }

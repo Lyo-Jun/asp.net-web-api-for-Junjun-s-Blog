@@ -4,7 +4,9 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using WebApplication3.Controllers;
 using WebApplication3.Entities;
+using WebApplication3.Repositories;
 
 public class Program
 {
@@ -13,6 +15,11 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+        builder.Services
+            .AddScoped<IArticleRepository, ArticleRepository>()
+            .AddScoped<ICategoryRepository, CategoryRepository>()
+            .AddScoped<ITagRepository, TagRepository>();
 
 
 // Add services to the container.
@@ -48,7 +55,7 @@ public class Program
         using (var scope = app.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<DBContext>();
-
+           
             await db.Database.EnsureCreatedAsync();
         }
 

@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace WebApplication3.Entities;
 
 using System.ComponentModel.DataAnnotations;
@@ -8,8 +10,7 @@ public class Article
     [Key] public int ID { get; set; }
 
     public string Name { get; set; }
-
-    public string Markdown { get; set; }
+    [Unicode] public string Markdown { get; set; }
     public bool IsPublished { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
